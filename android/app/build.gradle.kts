@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.oil_erp"
+    namespace = "com.oilindia.erp"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = "29.0.13599879"
 
