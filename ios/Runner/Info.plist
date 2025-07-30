@@ -41,7 +41,8 @@
 			<string>UIInterfaceOrientationLandscapeLeft</string>
 			<string>UIInterfaceOrientationLandscapeRight</string>
 		</array>
-		<array>
+		<key>LSApplicationQueriesSchemes</key>
+        <array>
         	<string>https</string>
         	<string>http</string>
         </array>
