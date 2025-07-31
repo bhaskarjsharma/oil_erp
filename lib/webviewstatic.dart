@@ -62,10 +62,10 @@ class _WebViewStaticState extends State<WebViewStatic> {
       child: Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
-          toolbarHeight: 65,
+          //toolbarHeight: 65,
           scrolledUnderElevation: 0,
           backgroundColor: Color(0xFFE5E5E5),
-          title: Center(child:Image.asset('images/oil_logo_with_background.png',height:60),),
+          title: Center(child:Image.asset('images/oil_logo_with_background.png',height:55),),
           automaticallyImplyLeading: false,
         ),
         body: Column(
