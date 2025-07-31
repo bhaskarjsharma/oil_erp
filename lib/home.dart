@@ -49,6 +49,12 @@ class Home extends StatelessWidget {
                   mainAxisSpacing: 10,
                   crossAxisCount: 3,
                   children: <Widget>[
+/*                    InkWell(
+                      onTap: (){
+                        context.go('/company');
+                      },
+                      child: Text('company'),
+                    ),*/
                     launchScreenCard(
                         "Company profile",
                         Icon(Icons.business_outlined,

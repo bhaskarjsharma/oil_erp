@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:oil_erp/webviewstatic.dart';
+import 'company.dart';
 import 'home.dart';
 import 'login.dart';
 import 'vendor.dart';
@@ -26,6 +27,10 @@ final GoRouter router = GoRouter(
         GoRoute(
           path: 'login',
           builder: (BuildContext context, GoRouterState state) => Login(),
+        ),
+        GoRoute(
+          path: 'company',
+          builder: (BuildContext context, GoRouterState state) => CompanyProfilePage(),
         ),
         GoRoute(
           path: 'webview',  // ✅ no path parameter here

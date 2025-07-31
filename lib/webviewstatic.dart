@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
+import 'package:go_router/go_router.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 class WebViewStatic extends StatefulWidget {
@@ -43,36 +44,52 @@ class _WebViewStaticState extends State<WebViewStatic> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        toolbarHeight: 65,
-        scrolledUnderElevation: 0,
-        backgroundColor: Color(0xFFE5E5E5),
-        title: Center(child:Image.asset('images/oil_logo_with_background.png',height:60),),
-        automaticallyImplyLeading: false,
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            child: WebViewWidget(
-              controller: controller
-            ),
-          ),
-          Container(
-            decoration: BoxDecoration(
-              color:Colors.white70,
-            ),
-            width: double.infinity,
-            child: Center(
-              child: Padding(
-                padding: EdgeInsets.all(2),
-                child: PlatformText('\u00A9 2025 Oil India Limited. All rights reserved', style: TextStyle(fontSize: 12)),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (bool didPop, Object? result) async {
+        if (didPop) {
+          return;
+        }
+        final bool shouldPop = await controller.canGoBack() ?? false;
+        if (context.mounted && shouldPop) {
+          controller.goBack();
+        }
+        else{
+          context.go('/');
+          // Navigator.pop(context);
+        }
+      },
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        appBar: AppBar(
+          toolbarHeight: 65,
+          scrolledUnderElevation: 0,
+          backgroundColor: Color(0xFFE5E5E5),
+          title: Center(child:Image.asset('images/oil_logo_with_background.png',height:60),),
+          automaticallyImplyLeading: false,
+        ),
+        body: Column(
+          children: [
+            Expanded(
+              child: WebViewWidget(
+                  controller: controller
               ),
             ),
+            Container(
+              decoration: BoxDecoration(
+                color:Colors.white70,
+              ),
+              width: double.infinity,
+              child: Center(
+                child: Padding(
+                  padding: EdgeInsets.all(2),
+                  child: PlatformText('\u00A9 2025 Oil India Limited. All rights reserved', style: TextStyle(fontSize: 12)),
+                ),
+              ),
 
-          )
-        ],
+            )
+          ],
+        ),
       ),
     );
   }
