@@ -1,46 +1,64 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 
 class CompanyProfilePage extends StatelessWidget {
   const CompanyProfilePage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF4F4F4),
-      body: SafeArea(
-        child: Stack(
-          children: [
-            const Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              child: Header(),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(top: 70),
-              child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-                      child: ContentSection(),
+    return PlatformScaffold(
+      backgroundColor: Color(0xFFE5E5E5),
+      appBar: PlatformAppBar(
+        material: (_, __) => MaterialAppBarData(
+          scrolledUnderElevation: 0,
+          backgroundColor: Color(0xFFE5E5E5),
+        ),
+        cupertino: (_, __) => CupertinoNavigationBarData(
+          // Issue with cupertino where a bar with no transparency
+          // will push the list down. Adding some alpha value fixes it (in a hacky way)
+          backgroundColor: Color(0xFFE5E5E5).withAlpha(254),
+        ),
+        //toolbarHeight: 65,
+        //scrolledUnderElevation: 0,
+        title: Center(child:Image.asset('images/oil_logo_with_background.png',height:55),),
+        automaticallyImplyLeading: false,
+      ),
+      body: Stack(
+        children: [
+          const Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: Header(),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(top: 70),
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+                    child: ContentSection(),
+                  ),
+                  const SizedBox(height: 40),
+                  Container(
+                    decoration: BoxDecoration(
+                      color:Colors.white70,
                     ),
-                    const SizedBox(height: 40),
-                    Container(
-                      color: const Color(0xFFEEEEEE),
-                      padding: const EdgeInsets.all(20),
-                      child: const Text(
-                        '© 2025 Oil India Limited. All rights reserved.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 14, color: Colors.grey),
+                    width: double.infinity,
+                    child: Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(2),
+                        child: Text('\u00A9 2025 Oil India Limited. All rights reserved', style: TextStyle(fontSize: 12)),
                       ),
-                    )
-                  ],
-                ),
+                    ),
+
+                  )
+                ],
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -51,15 +69,15 @@ class Header extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: const Color(0xFF004466),
+      color: const Color(0xFF333333),
       padding: const EdgeInsets.all(18),
       child: const Center(
         child: Text(
           'Company Profile',
           style: TextStyle(
             color: Colors.white,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
+            fontSize: 24,
+            fontWeight: FontWeight.normal,
             letterSpacing: 0.5,
           ),
         ),

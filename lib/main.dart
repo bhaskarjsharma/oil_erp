@@ -2,9 +2,13 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:go_router/go_router.dart';
+import 'package:oil_erp/vendorweb.dart';
 import 'package:oil_erp/webviewstatic.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 import 'company.dart';
+import 'contact.dart';
 import 'home.dart';
+import 'leadership.dart';
 import 'login.dart';
 import 'vendor.dart';
 import 'webview.dart';
@@ -23,6 +27,18 @@ final GoRouter router = GoRouter(
         GoRoute(
           path: 'vendor',
           builder: (BuildContext context, GoRouterState state) => Vendor(),
+          routes: <RouteBase>[
+            GoRoute(
+              path: 'vendorwebview',  // ✅ no path parameter here
+              builder: (context, state) {
+                final url = state.uri.queryParameters['url'];
+                if (url == null || url.isEmpty) {
+                  return const Scaffold(body: Center(child: Text("Missing URL")));
+                }
+                return VendorWebView(url: url);
+              },
+            ),
+          ]
         ),
         GoRoute(
           path: 'login',
@@ -31,6 +47,14 @@ final GoRouter router = GoRouter(
         GoRoute(
           path: 'company',
           builder: (BuildContext context, GoRouterState state) => CompanyProfilePage(),
+        ),
+        GoRoute(
+          path: 'leadership',
+          builder: (BuildContext context, GoRouterState state) => Leadership(),
+        ),
+        GoRoute(
+          path: 'contact',
+          builder: (BuildContext context, GoRouterState state) => ContactUs(),
         ),
         GoRoute(
           path: 'webview',  // ✅ no path parameter here
@@ -125,7 +149,16 @@ class _MainAppState extends State<MainApp>{
                 DefaultWidgetsLocalizations.delegate,
                 DefaultCupertinoLocalizations.delegate,
               ],
-              routerConfig: router
+              routerConfig: router,
+              builder: (context, child) => ResponsiveBreakpoints.builder(
+                breakpoints: [
+                  const Breakpoint(start: 0, end: 450, name: MOBILE),
+                  const Breakpoint(start: 451, end: 800, name: TABLET),
+                  const Breakpoint(start: 801, end: 1920, name: DESKTOP),
+                  const Breakpoint(start: 1921, end: double.infinity, name: '4K'),
+                ],
+                child: child!,
+              ),
             ),
           ),
     );

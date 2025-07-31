@@ -11,12 +11,20 @@ class Login extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return PlatformScaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
+      appBar: PlatformAppBar(
+        material: (_, __) => MaterialAppBarData(
+          scrolledUnderElevation: 0,
+          backgroundColor: Color(0xFFE5E5E5),
+        ),
+        cupertino: (_, __) => CupertinoNavigationBarData(
+          // Issue with cupertino where a bar with no transparency
+          // will push the list down. Adding some alpha value fixes it (in a hacky way)
+          backgroundColor: Color(0xFFE5E5E5).withAlpha(254),
+        ),
         //toolbarHeight: 65,
-        scrolledUnderElevation: 0,
-        backgroundColor: Color(0xFFE5E5E5),
+        //scrolledUnderElevation: 0,
         title: Center(child:Image.asset('images/oil_logo_with_background.png',height:55),),
         automaticallyImplyLeading: false,
       ),
@@ -66,27 +74,39 @@ class Login extends StatelessWidget {
                         letterSpacing: 1.2,  // Optional: spacing between letters
                       ),
                     ),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                          textStyle: const TextStyle(fontSize: 16,fontWeight: FontWeight.w700),
-                          backgroundColor: Color(0xFFE5E5E5)
-                      ),
+                    PlatformElevatedButton(
+                      color: Color(0xFFE5E5E5),
+
+                        material: (_, __) => MaterialElevatedButtonData(
+                          style: ElevatedButton.styleFrom(
+                              textStyle: const TextStyle(fontSize: 16,fontWeight: FontWeight.w700),
+                            backgroundColor: Color(0xFFE5E5E5),
+                          ),
+                        ),
+                        cupertino: (_, __) => CupertinoElevatedButtonData(
+                          color: Color(0xFFE5E5E5),
+                        ),
                       onPressed: ()  {
                         final encodedUrl = Uri.encodeComponent("https://btp-production-f0dzcdvq.launchpad.cfapps.in30.hana.ondemand.com/site?siteId=9a83e36a-4df2-4cda-89e1-750582e0e8a7");
                         context.go('/webview?url=$encodedUrl');
                       },
-                      child: Text('Executive Login'),
+                      child: PlatformText('Executive Login'),
                     ),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
+                    PlatformElevatedButton(
+                      material: (_, __) => MaterialElevatedButtonData(
+                        style: ElevatedButton.styleFrom(
                           textStyle: const TextStyle(fontSize: 16,fontWeight: FontWeight.w700),
-                          backgroundColor: Color(0xFFE5E5E5)
+                          backgroundColor: Color(0xFFE5E5E5),
+                        ),
+                      ),
+                      cupertino: (_, __) => CupertinoElevatedButtonData(
+                        color: Color(0xFFE5E5E5),
                       ),
                       onPressed: () {
                         final encodedUrl = Uri.encodeComponent("https://ess.oilindia.in");
                         context.go('/webview?url=$encodedUrl');
                       },
-                      child: Text('Unionized Employee Login'),
+                      child: PlatformText('Unionized Employee Login'),
                     ),
                   ],
                 ),

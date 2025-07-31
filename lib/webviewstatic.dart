@@ -59,12 +59,20 @@ class _WebViewStaticState extends State<WebViewStatic> {
           // Navigator.pop(context);
         }
       },
-      child: Scaffold(
+      child: PlatformScaffold(
         backgroundColor: Colors.white,
-        appBar: AppBar(
+        appBar: PlatformAppBar(
+          material: (_, __) => MaterialAppBarData(
+            scrolledUnderElevation: 0,
+            backgroundColor: Color(0xFFE5E5E5),
+          ),
+          cupertino: (_, __) => CupertinoNavigationBarData(
+            // Issue with cupertino where a bar with no transparency
+            // will push the list down. Adding some alpha value fixes it (in a hacky way)
+            backgroundColor: Color(0xFFE5E5E5).withAlpha(254),
+          ),
           //toolbarHeight: 65,
-          scrolledUnderElevation: 0,
-          backgroundColor: Color(0xFFE5E5E5),
+          //scrolledUnderElevation: 0,
           title: Center(child:Image.asset('images/oil_logo_with_background.png',height:55),),
           automaticallyImplyLeading: false,
         ),

@@ -10,18 +10,26 @@ class Home extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return PlatformScaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
+      appBar: PlatformAppBar(
+        material: (_, __) => MaterialAppBarData(
+          scrolledUnderElevation: 0,
+          backgroundColor: Color(0xFFE5E5E5),
+        ),
+        cupertino: (_, __) => CupertinoNavigationBarData(
+          // Issue with cupertino where a bar with no transparency
+          // will push the list down. Adding some alpha value fixes it (in a hacky way)
+          backgroundColor: Color(0xFFE5E5E5).withAlpha(254),
+        ),
         //toolbarHeight: 65,
-        scrolledUnderElevation: 0,
-        backgroundColor: Color(0xFFE5E5E5),
+        //scrolledUnderElevation: 0,
         title: Center(child:Image.asset('images/oil_logo_with_background.png',height:55),),
         automaticallyImplyLeading: false,
       ),
       body: Container(
         decoration: BoxDecoration(
-          //color:Color(0xFFE5E5E5),
+          color:Color(0xFFE5E5E5),
         ),
         child: Column(
           children: <Widget>[
@@ -57,16 +65,28 @@ class Home extends StatelessWidget {
                     ),*/
                     launchScreenCard(
                         "Company profile",
+                        const Icon(Icons.supervisor_account_outlined,
+                            size: 30, color: Color.fromRGBO(227, 30, 36, 1)),
+                        Colors.blue,"page","/company", context
+                    ),
+/*                    launchScreenCard(
+                        "Company profile",
                         Icon(Icons.business_outlined,
                             size: 30, color: const Color.fromRGBO(227, 30, 36, 1)),
                         Colors.blue,"static_html","company.html", context
-                    ),
+                    ),*/
                     launchScreenCard(
+                        "Our Leaders",
+                        const Icon(Icons.supervisor_account_outlined,
+                            size: 30, color: Color.fromRGBO(227, 30, 36, 1)),
+                        Colors.blue,"page","/leadership", context
+                    ),
+/*                    launchScreenCard(
                         "Our Leaders",
                         const Icon(Icons.group_add_outlined,
                             size: 30, color: Color.fromRGBO(227, 30, 36, 1)),
                         Colors.blue,"static_html","leadership.html", context
-                    ),
+                    ),*/
                     launchScreenCard(
                         "e-tender",
                         const Icon(Icons.shopping_cart_outlined,
@@ -104,6 +124,12 @@ class Home extends StatelessWidget {
                             size: 30, color: Color.fromRGBO(227, 30, 36, 1)),
                         Colors.blue,"static_html","csr.html", context
                     ),
+/*                    launchScreenCard(
+                        "Contact Us",
+                        const Icon(Icons.supervisor_account_outlined,
+                            size: 30, color: Color.fromRGBO(227, 30, 36, 1)),
+                        Colors.blue,"page","/contact", context
+                    ),*/
                     launchScreenCard(
                         "Contact Us",
                         const Icon(Icons.contact_mail_outlined,
@@ -143,7 +169,7 @@ class Home extends StatelessWidget {
                     ),
                     elevation: 0,
                     icon: Icon(Icons.lock_person_outlined, size: 20),
-                    label: Text('Secured Services', style: TextStyle(fontSize: 16)),
+                    label: PlatformText('Secured Services', style: TextStyle(fontSize: 16)),
                     backgroundColor: Color(0xFFD5DADD),
                     extendedPadding: EdgeInsets.symmetric(horizontal: 12),
                   ),

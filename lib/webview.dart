@@ -14,6 +14,7 @@ class WebView extends StatefulWidget {
 class _WebViewState extends State<WebView> {
   late final WebViewController controller;
   bool isLoading = false;
+  int prog = 0;
 
   @override
   void initState() {
@@ -22,6 +23,9 @@ class _WebViewState extends State<WebView> {
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setNavigationDelegate(
           NavigationDelegate(
+              onProgress: (int progress) {
+                // Update loading bar.
+              },
             onPageStarted: (url){
               setState(() {
                 isLoading = true;
@@ -29,8 +33,11 @@ class _WebViewState extends State<WebView> {
             }, onPageFinished: (url) async{
             setState(() {
               isLoading = false;
-            });
-            }
+              });
+            },
+            onNavigationRequest: (NavigationRequest request) {
+              return NavigationDecision.navigate;
+            },
           ),
       )
       ..loadRequest(Uri.parse(widget.url));
@@ -41,14 +48,35 @@ class _WebViewState extends State<WebView> {
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (bool didPop, Object? result) async {
+        print('result $result.toString()');
+        print('didPop $didPop');
         if (didPop) {
           return;
         }
+        final currentUrl = await controller.currentUrl();
+        print('currentUrl: $currentUrl');
+        if (currentUrl != null && currentUrl.contains('microsoft')) {
+          // Disable WebView back if it's on "home"
+          print('At home page. Popping Flutter route.');
+          context.go('/login');
+          return;
+        }
+        else if (currentUrl != null && currentUrl.contains('#Shell-home')) {
+          // Disable WebView back if it's on "home"
+          print('At home page. Popping Flutter route.');
+          context.go('/login');
+          return;
+        }
+
+
         final bool shouldPop = await controller.canGoBack() ?? false;
+        print('shouldPop $shouldPop');
         if (context.mounted && shouldPop) {
+          print('controller.goBack()');
           controller.goBack();
         }
         else{
+          print('go()');
           context.go('/');
          // Navigator.pop(context);
         }
@@ -72,8 +100,18 @@ class _WebViewState extends State<WebView> {
         body: Column(
           children: [
             Expanded(child: isLoading == true ?  Container(
-              child: const Center(
-                child: CircularProgressIndicator(),
+              child: Center(
+                child: PlatformCircularProgressIndicator(
+                  material: (_, __)  => MaterialProgressIndicatorData(
+                    //value: prog < 100 ? prog / 100 : null,
+                    strokeWidth: 3,
+                    color: Colors.red
+                  ),
+                    cupertino: (_, __) => CupertinoProgressIndicatorData(
+                      animating: true,
+                      color: Colors.red
+                    )
+                ),
               ),
             ) : WebViewWidget(
                 controller: controller
