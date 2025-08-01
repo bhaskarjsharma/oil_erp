@@ -56,6 +56,7 @@ class Login extends StatelessWidget {
               ),
               child: Padding(padding: EdgeInsets.all(30),
                 child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     PlatformText(
                       'Please select your login option',
@@ -68,7 +69,6 @@ class Login extends StatelessWidget {
                     ),
                     PlatformElevatedButton(
                       color: Color(0xFFE5E5E5),
-
                         material: (_, __) => MaterialElevatedButtonData(
                           style: ElevatedButton.styleFrom(
                               textStyle: const TextStyle(fontSize: 16,fontWeight: FontWeight.w700),
@@ -77,12 +77,13 @@ class Login extends StatelessWidget {
                         ),
                         cupertino: (_, __) => CupertinoElevatedButtonData(
                           color: Color(0xFFE5E5E5),
+
                         ),
                       onPressed: ()  {
                         final encodedUrl = Uri.encodeComponent("https://btp-production-f0dzcdvq.launchpad.cfapps.in30.hana.ondemand.com/site?siteId=9a83e36a-4df2-4cda-89e1-750582e0e8a7");
                         context.go('/webview?url=$encodedUrl');
                       },
-                      child: PlatformText('Executive Login'),
+                      child: PlatformText('Executive Login',style: TextStyle(fontSize: 16,color: Colors.black)),
                     ),
                     PlatformElevatedButton(
                       material: (_, __) => MaterialElevatedButtonData(
@@ -98,7 +99,7 @@ class Login extends StatelessWidget {
                         final encodedUrl = Uri.encodeComponent("https://ess.oilindia.in");
                         context.go('/webview?url=$encodedUrl');
                       },
-                      child: PlatformText('Unionized Employee Login'),
+                      child: PlatformText('Unionized Employee Login',style: TextStyle(fontSize: 16,color: Colors.black)),
                     ),
                   ],
                 ),
