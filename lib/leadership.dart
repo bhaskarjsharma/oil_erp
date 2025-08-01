@@ -132,9 +132,17 @@ class _OurLeadershipPageState extends State<Leadership> {
       },
     ];
 
-    return PlatformScaffold(
+    return Scaffold(
       backgroundColor: Color(0xFFE5E5E5),
-      appBar: PlatformAppBar(
+      appBar: AppBar(
+        title:Image.asset('images/oil_logo_with_background.png',height:55),
+        centerTitle: true,
+        backgroundColor: Color(0xFFE5E5E5),
+        automaticallyImplyLeading: true,
+        scrolledUnderElevation: 0,
+      ),
+
+      /*PlatformAppBar(
         material: (_, __) => MaterialAppBarData(
           scrolledUnderElevation: 0,
           backgroundColor: Color(0xFFE5E5E5),
@@ -147,8 +155,8 @@ class _OurLeadershipPageState extends State<Leadership> {
         //toolbarHeight: 65,
         //scrolledUnderElevation: 0,
         title: Center(child:Image.asset('images/oil_logo_with_background.png',height:55),),
-        automaticallyImplyLeading: false,
-      ),
+        automaticallyImplyLeading: true,
+      ),*/
       body: Column(
         children: [
           Container(

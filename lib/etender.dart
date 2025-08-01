@@ -39,22 +39,14 @@ class _ETenderState extends State<ETender> {
 
   @override
   Widget build(BuildContext context) {
-    return PlatformScaffold(
+    return Scaffold(
       backgroundColor: Colors.white,
-      appBar: PlatformAppBar(
-        material: (_, __) => MaterialAppBarData(
-          scrolledUnderElevation: 0,
-          backgroundColor: Color(0xFFE5E5E5),
-        ),
-        cupertino: (_, __) => CupertinoNavigationBarData(
-          // Issue with cupertino where a bar with no transparency
-          // will push the list down. Adding some alpha value fixes it (in a hacky way)
-          backgroundColor: Color(0xFFE5E5E5).withAlpha(254),
-        ),
-        //toolbarHeight: 65,
-        //scrolledUnderElevation: 0,
-        title: Center(child:Image.asset('images/oil_logo_with_background.png',height:55),),
-        automaticallyImplyLeading: false,
+      appBar: AppBar(
+        title:Image.asset('images/oil_logo_with_background.png',height:55),
+        centerTitle: true,
+        backgroundColor: Color(0xFFE5E5E5),
+        automaticallyImplyLeading: true,
+        scrolledUnderElevation: 0,
       ),
       body: Column(
         children: [

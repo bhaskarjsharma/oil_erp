@@ -1,27 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
+import 'package:go_router/go_router.dart';
 
 class CompanyProfilePage extends StatelessWidget {
   const CompanyProfilePage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return PlatformScaffold(
+    return Scaffold(
       backgroundColor: Color(0xFFE5E5E5),
-      appBar: PlatformAppBar(
-        material: (_, __) => MaterialAppBarData(
-          scrolledUnderElevation: 0,
-          backgroundColor: Color(0xFFE5E5E5),
-        ),
-        cupertino: (_, __) => CupertinoNavigationBarData(
-          // Issue with cupertino where a bar with no transparency
-          // will push the list down. Adding some alpha value fixes it (in a hacky way)
-          backgroundColor: Color(0xFFE5E5E5).withAlpha(254),
-        ),
-        //toolbarHeight: 65,
-        //scrolledUnderElevation: 0,
-        title: Center(child:Image.asset('images/oil_logo_with_background.png',height:55),),
-        automaticallyImplyLeading: false,
+      appBar: AppBar(
+        title:Image.asset('images/oil_logo_with_background.png',height:55),
+        centerTitle: true,
+        backgroundColor: Color(0xFFE5E5E5),
+        automaticallyImplyLeading: true,
+        scrolledUnderElevation: 0,
       ),
       body: Stack(
         children: [
@@ -36,6 +29,7 @@ class CompanyProfilePage extends StatelessWidget {
             child: SingleChildScrollView(
               child: Column(
                 children: [
+
                   const Padding(
                     padding: EdgeInsets.symmetric(horizontal: 16, vertical: 24),
                     child: ContentSection(),

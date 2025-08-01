@@ -45,21 +45,21 @@ class _WebViewState extends State<WebView> {
 
   @override
   Widget build(BuildContext context) {
-    return PlatformScaffold(
-      appBar: PlatformAppBar(
+    return Scaffold(
+      appBar: AppBar(
         backgroundColor: Color(0xFFE5E5E5),
-        title: Center(
-            child: PlatformText(
-              'OIL ERP Mobile',
-              style:  TextStyle(
-                fontSize: 25,
-                fontWeight: FontWeight.bold,
-                color: Colors.black, // Text color
-                letterSpacing: 1.2,  // Optional: spacing between letters
-              ),
-            )
+        title: PlatformText(
+          'OIL ERP Mobile',
+          style:  TextStyle(
+            fontSize: 25,
+            fontWeight: FontWeight.bold,
+            color: Colors.black, // Text color
+            letterSpacing: 1.2,  // Optional: spacing between letters
+          ),
         ),
-        automaticallyImplyLeading: false,
+        automaticallyImplyLeading: true,
+        centerTitle: true,
+        scrolledUnderElevation: 0,
       ),
       body: Column(
         children: [
