@@ -1,7 +1,7 @@
 name: oil_erp
 description: "OIL ERP App"
 publish_to: "none"
-version: 1.0.0+1002
+version: 1.0.0+1003
 
 environment:
   sdk: ^3.8.1

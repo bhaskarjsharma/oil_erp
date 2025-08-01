@@ -45,7 +45,60 @@ class _WebViewState extends State<WebView> {
 
   @override
   Widget build(BuildContext context) {
-    return PopScope(
+    return PlatformScaffold(
+      appBar: PlatformAppBar(
+        backgroundColor: Color(0xFFE5E5E5),
+        title: Center(
+            child: PlatformText(
+              'OIL ERP Mobile',
+              style:  TextStyle(
+                fontSize: 25,
+                fontWeight: FontWeight.bold,
+                color: Colors.black, // Text color
+                letterSpacing: 1.2,  // Optional: spacing between letters
+              ),
+            )
+        ),
+        automaticallyImplyLeading: false,
+      ),
+      body: Column(
+        children: [
+          Expanded(child: isLoading == true ?  Container(
+            child: Center(
+              child: PlatformCircularProgressIndicator(
+                  material: (_, __)  => MaterialProgressIndicatorData(
+                    //value: prog < 100 ? prog / 100 : null,
+                      strokeWidth: 3,
+                      color: Colors.red
+                  ),
+                  cupertino: (_, __) => CupertinoProgressIndicatorData(
+                      animating: true,
+                      color: Colors.red
+                  )
+              ),
+            ),
+          ) : WebViewWidget(
+              controller: controller
+          ),
+          ),
+          Container(
+            decoration: BoxDecoration(
+              color:Colors.white70,
+            ),
+            width: double.infinity,
+            child: Center(
+              child: Padding(
+                padding: EdgeInsets.all(2),
+                child: PlatformText('\u00A9 2025 Oil India Limited. All rights reserved', style: TextStyle(fontSize: 12)),
+              ),
+            ),
+
+          )
+        ],
+      ),
+    );
+
+/*      PopScope(
       canPop: false,
       onPopInvokedWithResult: (bool didPop, Object? result) async {
         print('result $result.toString()');
@@ -81,59 +134,7 @@ class _WebViewState extends State<WebView> {
          // Navigator.pop(context);
         }
       },
-      child: PlatformScaffold(
-        appBar: PlatformAppBar(
-          backgroundColor: Color(0xFFE5E5E5),
-          title: Center(
-              child: PlatformText(
-                'OIL ERP Mobile',
-                style:  TextStyle(
-                  fontSize: 25,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black, // Text color
-                  letterSpacing: 1.2,  // Optional: spacing between letters
-                ),
-              )
-          ),
-          automaticallyImplyLeading: false,
-        ),
-        body: Column(
-          children: [
-            Expanded(child: isLoading == true ?  Container(
-              child: Center(
-                child: PlatformCircularProgressIndicator(
-                  material: (_, __)  => MaterialProgressIndicatorData(
-                    //value: prog < 100 ? prog / 100 : null,
-                    strokeWidth: 3,
-                    color: Colors.red
-                  ),
-                    cupertino: (_, __) => CupertinoProgressIndicatorData(
-                      animating: true,
-                      color: Colors.red
-                    )
-                ),
-              ),
-            ) : WebViewWidget(
-                controller: controller
-            ),
-            ),
-            Container(
-              decoration: BoxDecoration(
-                color:Colors.white70,
-              ),
-              width: double.infinity,
-              child: Center(
-                child: Padding(
-                  padding: EdgeInsets.all(2),
-                  child: PlatformText('\u00A9 2025 Oil India Limited. All rights reserved', style: TextStyle(fontSize: 12)),
-                ),
-              ),
-
-            )
-          ],
-        ),
-      ),
-      
-    );
+      child:
+    );*/
   }
 }

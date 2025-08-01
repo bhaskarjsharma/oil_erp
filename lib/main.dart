@@ -4,7 +4,6 @@ import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:oil_erp/vendorweb.dart';
 import 'package:oil_erp/webviewstatic.dart';
-import 'package:responsive_framework/responsive_framework.dart';
 import 'company.dart';
 import 'contact.dart';
 import 'etender.dart';
@@ -161,7 +160,7 @@ class _MainAppState extends State<MainApp>{
                 DefaultCupertinoLocalizations.delegate,
               ],
               routerConfig: router,
-              builder: (context, child) => ResponsiveBreakpoints.builder(
+/*              builder: (context, child) => ResponsiveBreakpoints.builder(
                 breakpoints: [
                   const Breakpoint(start: 0, end: 450, name: MOBILE),
                   const Breakpoint(start: 451, end: 800, name: TABLET),
@@ -169,7 +168,7 @@ class _MainAppState extends State<MainApp>{
                   const Breakpoint(start: 1921, end: double.infinity, name: '4K'),
                 ],
                 child: child!,
-              ),
+              ),*/
             ),
           ),
     );
