@@ -94,7 +94,7 @@ class _ETenderState extends State<ETender> {
             ),
           ),
           SizedBox(height:2),
-          Container(
+/*          Container(
             decoration: BoxDecoration(
               color:Color(0xFFFFFFFF),
             ),
@@ -119,7 +119,7 @@ class _ETenderState extends State<ETender> {
                 ),
               ),
             ),
-          ),
+          ),*/
           Container(
             decoration: BoxDecoration(
               color:Colors.white70,

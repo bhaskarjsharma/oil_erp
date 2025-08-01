@@ -10,22 +10,14 @@ class Home extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return PlatformScaffold(
-      backgroundColor: Colors.white,
-      appBar: PlatformAppBar(
-        material: (_, __) => MaterialAppBarData(
-          scrolledUnderElevation: 0,
-          backgroundColor: Color(0xFFE5E5E5),
-        ),
-        cupertino: (_, __) => CupertinoNavigationBarData(
-          // Issue with cupertino where a bar with no transparency
-          // will push the list down. Adding some alpha value fixes it (in a hacky way)
-          backgroundColor: Color(0xFFE5E5E5).withAlpha(254),
-        ),
-        //toolbarHeight: 65,
-        //scrolledUnderElevation: 0,
-        title: Center(child:Image.asset('images/oil_logo_with_background.png',height:55),),
+    return Scaffold(
+      backgroundColor: Color(0xFFE5E5E5),
+      appBar: AppBar(
+        title:Image.asset('images/oil_logo_with_background.png',height:55),
+        centerTitle: true,
+        backgroundColor: Color(0xFFE5E5E5),
         automaticallyImplyLeading: false,
+        scrolledUnderElevation: 0,
       ),
       body: Container(
         decoration: BoxDecoration(
@@ -43,7 +35,6 @@ class Home extends StatelessWidget {
                 letterSpacing: 1.2,  // Optional: spacing between letters
               ),
             ),
-
             Image.asset('images/banner.gif'),
             Expanded(
               child: Container(
