@@ -1,6 +1,10 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:go_router/go_router.dart';
+import 'package:open_file/open_file.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 class WebView extends StatefulWidget {
@@ -12,35 +16,12 @@ class WebView extends StatefulWidget {
 }
 
 class _WebViewState extends State<WebView> {
-  late final WebViewController controller;
-  bool isLoading = false;
-  int prog = 0;
+  late final InAppWebViewController webViewController;
+  double progress = 0;
 
   @override
   void initState() {
     super.initState();
-    controller = WebViewController()
-      ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setNavigationDelegate(
-          NavigationDelegate(
-              onProgress: (int progress) {
-                // Update loading bar.
-              },
-            onPageStarted: (url){
-              setState(() {
-                isLoading = true;
-              });
-            }, onPageFinished: (url) async{
-            setState(() {
-              isLoading = false;
-              });
-            },
-            onNavigationRequest: (NavigationRequest request) {
-              return NavigationDecision.navigate;
-            },
-          ),
-      )
-      ..loadRequest(Uri.parse(widget.url));
   }
 
   @override
@@ -63,23 +44,96 @@ class _WebViewState extends State<WebView> {
       ),
       body: Column(
         children: [
-          Expanded(child: isLoading == true ?  Container(
-            child: Center(
-              child: PlatformCircularProgressIndicator(
-                  material: (_, __)  => MaterialProgressIndicatorData(
-                    //value: prog < 100 ? prog / 100 : null,
-                      strokeWidth: 3,
-                      color: Colors.red
-                  ),
-                  cupertino: (_, __) => CupertinoProgressIndicatorData(
-                      animating: true,
-                      color: Colors.red
-                  )
+          progress < 1.0
+              ? LinearProgressIndicator(value: progress)
+              : Container(),
+          Expanded(
+            child: InAppWebView(
+              initialUrlRequest: URLRequest(url: WebUri(widget.url)),
+              initialSettings: InAppWebViewSettings(
+                useOnDownloadStart: true,
               ),
+              onProgressChanged: (controller,int progress) {
+                setState(() {
+                  this.progress = progress / 100;
+                });
+              },
+              onWebViewCreated: (controller) {
+                webViewController = controller;
+              },
+              onDownloadStartRequest: (controller, request) async {
+                final downloadUrl = request.url.toString();
+                final filename = request.suggestedFilename ?? "file.pdf";
+                final directory = await getDownloadsDirectory();
+                final filePath = '${directory?.path}/$filename';
+
+                final cookies = await CookieManager.instance().getCookies(url: request.url);
+                final cookieHeader = cookies.map((e) => "${e.name}=${e.value}").join("; ");
+
+                try {
+                  final response = await Dio().download(
+                    downloadUrl,
+                    filePath,
+                    options: Options(
+                      headers: {
+                        'Cookie': cookieHeader,
+                      },
+                    ),
+                    onReceiveProgress: (received, total) {
+                      if (total != -1) {
+                        setState(() {
+                          progress = received / total;
+                        });
+                      }
+                    },
+                  );
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    content: Text("File downloaded successfully"),
+                  ));
+                  OpenFile.open(filePath);
+                } catch (e) {
+                  debugPrint('Download failed: $e');
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    content: Text("Failed to download file."),
+                  ));
+                }
+              },
+/*              onPermissionRequest: (controller, request) async {
+                return PermissionResponse(
+                    resources: request.resources,
+                    action: PermissionResponseAction.GRANT);
+              },*/
             ),
-          ) : WebViewWidget(
-              controller: controller
           ),
+          Container(
+            decoration: BoxDecoration(
+              color:Color(0xFFE5E5E5),
+            ),
+            padding: EdgeInsets.zero,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                PlatformIconButton(
+                  icon: Icon(PlatformIcons(context).back,size: 20,),
+                  onPressed: () {
+                    webViewController?.goBack();
+                  },
+                ),
+                PlatformIconButton(
+                  icon: Icon(PlatformIcons(context).refresh,size: 20,),
+                  onPressed: () {
+                    webViewController?.reload();
+                  },
+                ),
+                PlatformIconButton(
+                  icon: Icon(PlatformIcons(context).forward,size: 20,),
+                  onPressed: () {
+                    webViewController?.goForward();
+                  },
+                ),
+              ],
+            ),
           ),
           Container(
             decoration: BoxDecoration(

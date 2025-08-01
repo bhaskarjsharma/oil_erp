@@ -10,6 +10,7 @@ import 'etender.dart';
 import 'home.dart';
 import 'leadership.dart';
 import 'login.dart';
+import 'test.dart';
 import 'vendor.dart';
 import 'webview.dart';
 
@@ -85,6 +86,10 @@ final GoRouter router = GoRouter(
             }
             return WebViewStatic(htmlSource: content);
           },
+        ),
+        GoRoute(
+          path: 'test',
+          builder: (BuildContext context, GoRouterState state) => Test(),
         ),
       ],
     ),
