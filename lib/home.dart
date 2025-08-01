@@ -91,9 +91,14 @@ class Home extends StatelessWidget {
                         "e-tender",
                         const Icon(Icons.shopping_cart_outlined,
                             size: 30, color: Colors.red),
-                        Colors.blue,"url", "https://etender.srm.oilindia.in/irj/portal",context
+                        Colors.blue,"etender", "https://etender.srm.oilindia.in/irj/portal",context
                     ),
-
+/*                    launchScreenCard(
+                        "e-tender",
+                        const Icon(Icons.shopping_cart_outlined,
+                            size: 30, color: Colors.red),
+                        Colors.blue,"url", "https://etender.srm.oilindia.in/irj/portal",context
+                    ),*/
                     launchScreenCard(
                         "Vendor Invoice Portal",
                         const Icon(Icons.receipt_long_outlined,
@@ -214,6 +219,10 @@ class Home extends StatelessWidget {
             case "url":
               final encodedUrl = Uri.encodeComponent(route);
               context.go('/webview?url=$encodedUrl');
+              break;
+            case "etender":
+              final encodedUrl = Uri.encodeComponent(route);
+              context.go('/etender?url=$encodedUrl');
               break;
             case "static_html":
               context.go('/webviewstatic?htmlSource=$route');

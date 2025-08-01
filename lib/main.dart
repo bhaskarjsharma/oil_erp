@@ -7,6 +7,7 @@ import 'package:oil_erp/webviewstatic.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'company.dart';
 import 'contact.dart';
+import 'etender.dart';
 import 'home.dart';
 import 'leadership.dart';
 import 'login.dart';
@@ -55,6 +56,16 @@ final GoRouter router = GoRouter(
         GoRoute(
           path: 'contact',
           builder: (BuildContext context, GoRouterState state) => ContactUs(),
+        ),
+        GoRoute(
+          path: 'etender',  // ✅ no path parameter here
+          builder: (context, state) {
+            final url = state.uri.queryParameters['url'];
+            if (url == null || url.isEmpty) {
+              return const Scaffold(body: Center(child: Text("Missing URL")));
+            }
+            return ETender(url: url);
+          },
         ),
         GoRoute(
           path: 'webview',  // ✅ no path parameter here
