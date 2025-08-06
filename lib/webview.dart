@@ -64,12 +64,13 @@ class _WebViewState extends State<WebView> {
               onDownloadStartRequest: (controller, request) async {
                 final downloadUrl = request.url.toString();
                 final filename = request.suggestedFilename ?? "file.pdf";
+                Directory? directory;
                 if (Platform.isAndroid) {
                   directory = await getDownloadsDirectory();
                 } else if (Platform.isIOS) {
                   directory = await getApplicationDocumentsDirectory();
                 }
-                final directory = await getDownloadsDirectory();
+
                 final filePath = '${directory?.path}/$filename';
 
                 final cookies = await CookieManager.instance().getCookies(url: request.url);
