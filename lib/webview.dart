@@ -49,69 +49,7 @@ class _WebViewState extends State<WebView> {
               ? LinearProgressIndicator(value: progress)
               : Container(),
           Expanded(
-            child: InAppWebView(
-              initialUrlRequest: URLRequest(url: WebUri(widget.url)),
-              initialSettings: InAppWebViewSettings(useOnDownloadStart: true),
-              onProgressChanged: (controller, int progress) {
-                setState(() {
-                  this.progress = progress / 100;
-                });
-              },
-              onWebViewCreated: (controller) {
-                webViewController = controller;
-              },
-              onDownloadStartRequest: (controller, request) async {
-                final downloadUrl = request.url.toString();
-                final filename = request.suggestedFilename ?? "file.pdf";
-                Directory? directory;
-                if (Platform.isAndroid) {
-                  directory = await getDownloadsDirectory();
-                } else if (Platform.isIOS) {
-                  directory = await getApplicationDocumentsDirectory();
-                }
-                print('directory $directory');
-
-                final filePath = '${directory?.path}/$filename';
-                print('filePath $filePath');
-
-                final cookies = await CookieManager.instance().getCookies(
-                  url: request.url,
-                );
-                final cookieHeader = cookies
-                    .map((e) => "${e.name}=${e.value}")
-                    .join("; ");
-
-                try {
-                  final response = await Dio().download(
-                    downloadUrl,
-                    filePath,
-                    options: Options(headers: {'Cookie': cookieHeader}),
-                    onReceiveProgress: (received, total) {
-                      if (total != -1) {
-                        setState(() {
-                          progress = received / total;
-                        });
-                      }
-                    },
-                  );
-
-                  final file = File(filePath);
-                  if (await file.exists()) {
-                    print("✅ File exists, trying to open...");
-                    OpenFile.open(filePath);
-                  } else {
-                    print("❌ File not found at $filePath");
-                  }
-                } catch (e) {
-                  debugPrint('Download failed: $e');
-                }
-              },
-              /*              onPermissionRequest: (controller, request) async {
-                return PermissionResponse(
-                    resources: request.resources,
-                    action: PermissionResponseAction.GRANT);
-              },*/
-            ),
+            child: WebViewWidget(context),
           ),
           Container(
             decoration: BoxDecoration(color: Color(0xFFE5E5E5)),
@@ -205,5 +143,173 @@ class _WebViewState extends State<WebView> {
       },
       child:
     );*/
+  }
+  
+  Widget WebViewWidget(BuildContext context){
+    if (Platform.isAndroid) {
+      return PopScope(
+          canPop: false,
+          onPopInvokedWithResult: (bool didPop, Object? result) async {
+            print('result $result.toString()');
+            print('didPop $didPop');
+            if (didPop) {
+              return;
+            }
+            final webUri  = await webViewController.getUrl();
+            final currentUrl = webUri?.toString();
+            print('currentUrl: $currentUrl');
+            if (currentUrl != null && currentUrl.contains('microsoft')) {
+              // Disable WebView back if it's on "home"
+              print('At home page. Popping Flutter route.');
+              context.go('/login');
+              return;
+            }
+            else if (currentUrl != null && currentUrl.contains('#Shell-home')) {
+              // Disable WebView back if it's on "home"
+              print('At home page. Popping Flutter route.');
+              context.go('/login');
+              return;
+            }
+            final bool shouldPop = await webViewController.canGoBack() ?? false;
+            print('shouldPop $shouldPop');
+            if (context.mounted && shouldPop) {
+              print('controller.goBack()');
+              webViewController.goBack();
+            }
+            else{
+              print('go()');
+              context.go('/');
+              // Navigator.pop(context);
+            }
+          },
+          child: InAppWebView(
+            initialUrlRequest: URLRequest(url: WebUri(widget.url)),
+            initialSettings: InAppWebViewSettings(useOnDownloadStart: true),
+            onProgressChanged: (controller, int progress) {
+              setState(() {
+                this.progress = progress / 100;
+              });
+            },
+            onWebViewCreated: (controller) {
+              webViewController = controller;
+            },
+            onDownloadStartRequest: (controller, request) async {
+              final downloadUrl = request.url.toString();
+              final filename = request.suggestedFilename ?? "file.pdf";
+              Directory? directory;
+              if (Platform.isAndroid) {
+                directory = await getDownloadsDirectory();
+              } else if (Platform.isIOS) {
+                directory = await getApplicationDocumentsDirectory();
+              }
+              print('directory $directory');
+
+              final filePath = '${directory?.path}/$filename';
+              print('filePath $filePath');
+
+              final cookies = await CookieManager.instance().getCookies(
+                url: request.url,
+              );
+              final cookieHeader = cookies
+                  .map((e) => "${e.name}=${e.value}")
+                  .join("; ");
+
+              try {
+                final response = await Dio().download(
+                  downloadUrl,
+                  filePath,
+                  options: Options(headers: {'Cookie': cookieHeader}),
+                  onReceiveProgress: (received, total) {
+                    if (total != -1) {
+                      setState(() {
+                        progress = received / total;
+                      });
+                    }
+                  },
+                );
+
+                final file = File(filePath);
+                if (await file.exists()) {
+                  print("✅ File exists, trying to open...");
+                  OpenFile.open(filePath);
+                } else {
+                  print("❌ File not found at $filePath");
+                }
+              } catch (e) {
+                debugPrint('Download failed: $e');
+              }
+            },
+            /*              onPermissionRequest: (controller, request) async {
+                return PermissionResponse(
+                    resources: request.resources,
+                    action: PermissionResponseAction.GRANT);
+              },*/
+          )
+      );
+    } else {
+      return InAppWebView(
+        initialUrlRequest: URLRequest(url: WebUri(widget.url)),
+        initialSettings: InAppWebViewSettings(useOnDownloadStart: true),
+        onProgressChanged: (controller, int progress) {
+          setState(() {
+            this.progress = progress / 100;
+          });
+        },
+        onWebViewCreated: (controller) {
+          webViewController = controller;
+        },
+        onDownloadStartRequest: (controller, request) async {
+          final downloadUrl = request.url.toString();
+          final filename = request.suggestedFilename ?? "file.pdf";
+          Directory? directory;
+          if (Platform.isAndroid) {
+            directory = await getDownloadsDirectory();
+          } else if (Platform.isIOS) {
+            directory = await getApplicationDocumentsDirectory();
+          }
+          print('directory $directory');
+
+          final filePath = '${directory?.path}/$filename';
+          print('filePath $filePath');
+
+          final cookies = await CookieManager.instance().getCookies(
+            url: request.url,
+          );
+          final cookieHeader = cookies
+              .map((e) => "${e.name}=${e.value}")
+              .join("; ");
+
+          try {
+            final response = await Dio().download(
+              downloadUrl,
+              filePath,
+              options: Options(headers: {'Cookie': cookieHeader}),
+              onReceiveProgress: (received, total) {
+                if (total != -1) {
+                  setState(() {
+                    progress = received / total;
+                  });
+                }
+              },
+            );
+
+            final file = File(filePath);
+            if (await file.exists()) {
+              print("✅ File exists, trying to open...");
+              OpenFile.open(filePath);
+            } else {
+              print("❌ File not found at $filePath");
+            }
+          } catch (e) {
+            debugPrint('Download failed: $e');
+          }
+        },
+        /*              onPermissionRequest: (controller, request) async {
+                return PermissionResponse(
+                    resources: request.resources,
+                    action: PermissionResponseAction.GRANT);
+              },*/
+      );
+    }
   }
 }

@@ -167,13 +167,15 @@ class Home extends StatelessWidget {
                       context.go('/login');
                     },
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8), // Customize this value
+                      borderRadius: BorderRadius.circular(8),
+                      side: BorderSide(color: Colors.grey, width: 1),
                     ),
                     elevation: 0,
                     icon: Icon(Icons.lock_person_outlined, size: 20),
                     label: PlatformText('Secured Services', style: TextStyle(fontSize: 16)),
                     backgroundColor: Color(0xFFD5DADD),
                     extendedPadding: EdgeInsets.symmetric(horizontal: 12),
+
                   ),
                 ),
               ),
