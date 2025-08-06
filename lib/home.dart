@@ -144,12 +144,12 @@ class Home extends StatelessWidget {
                             size: 30, color: Color.fromRGBO(227, 30, 36, 1)),
                         Colors.blue,"static_html","about.html", context
                     ),
-                    launchScreenCard(
+/*                    launchScreenCard(
                         "Test Page",
                         const Icon(Icons.supervisor_account_outlined,
                             size: 30, color: Color.fromRGBO(227, 30, 36, 1)),
                         Colors.blue,"page","/test", context
-                    ),
+                    ),*/
                   ],
                 ),
               ),
