@@ -32,11 +32,11 @@ class _WebViewState extends State<WebView> {
         backgroundColor: Color(0xFFE5E5E5),
         title: PlatformText(
           'OIL ERP Mobile',
-          style:  TextStyle(
+          style: TextStyle(
             fontSize: 25,
             fontWeight: FontWeight.bold,
             color: Colors.black, // Text color
-            letterSpacing: 1.2,  // Optional: spacing between letters
+            letterSpacing: 1.2, // Optional: spacing between letters
           ),
         ),
         automaticallyImplyLeading: true,
@@ -51,10 +51,8 @@ class _WebViewState extends State<WebView> {
           Expanded(
             child: InAppWebView(
               initialUrlRequest: URLRequest(url: WebUri(widget.url)),
-              initialSettings: InAppWebViewSettings(
-                useOnDownloadStart: true,
-              ),
-              onProgressChanged: (controller,int progress) {
+              initialSettings: InAppWebViewSettings(useOnDownloadStart: true),
+              onProgressChanged: (controller, int progress) {
                 setState(() {
                   this.progress = progress / 100;
                 });
@@ -72,22 +70,22 @@ class _WebViewState extends State<WebView> {
                   directory = await getApplicationDocumentsDirectory();
                 }
                 print('directory $directory');
-                
+
                 final filePath = '${directory?.path}/$filename';
                 print('filePath $filePath');
 
-                final cookies = await CookieManager.instance().getCookies(url: request.url);
-                final cookieHeader = cookies.map((e) => "${e.name}=${e.value}").join("; ");
+                final cookies = await CookieManager.instance().getCookies(
+                  url: request.url,
+                );
+                final cookieHeader = cookies
+                    .map((e) => "${e.name}=${e.value}")
+                    .join("; ");
 
                 try {
                   final response = await Dio().download(
                     downloadUrl,
                     filePath,
-                    options: Options(
-                      headers: {
-                        'Cookie': cookieHeader,
-                      },
-                    ),
+                    options: Options(headers: {'Cookie': cookieHeader}),
                     onReceiveProgress: (received, total) {
                       if (total != -1) {
                         setState(() {
@@ -96,18 +94,19 @@ class _WebViewState extends State<WebView> {
                       }
                     },
                   );
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                    content: Text("File downloaded successfully"),
-                  ));
-                  OpenFile.open(filePath);
+
+                  final file = File(filePath);
+                  if (await file.exists()) {
+                    print("✅ File exists, trying to open...");
+                    OpenFile.open(filePath);
+                  } else {
+                    print("❌ File not found at $filePath");
+                  }
                 } catch (e) {
                   debugPrint('Download failed: $e');
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                    content: Text("Failed to download file."),
-                  ));
                 }
               },
-/*              onPermissionRequest: (controller, request) async {
+              /*              onPermissionRequest: (controller, request) async {
                 return PermissionResponse(
                     resources: request.resources,
                     action: PermissionResponseAction.GRANT);
@@ -115,37 +114,35 @@ class _WebViewState extends State<WebView> {
             ),
           ),
           Container(
-            decoration: BoxDecoration(
-              color:Color(0xFFE5E5E5),
-            ),
+            decoration: BoxDecoration(color: Color(0xFFE5E5E5)),
             padding: EdgeInsets.zero,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
                 PlatformIconButton(
-                  icon: Icon(PlatformIcons(context).back,size: 20,),
+                  icon: Icon(PlatformIcons(context).back, size: 20),
                   onPressed: () async {
-                     if (webViewController != null) {
+                    if (webViewController != null) {
                       bool canGoBack = await webViewController!.canGoBack();
                       if (canGoBack) {
                         webViewController!.goBack();
                       } else {
                         context.pop();
                       }
-                      } else {
-                        context.pop();
-                      }
+                    } else {
+                      context.pop();
+                    }
                   },
                 ),
                 PlatformIconButton(
-                  icon: Icon(PlatformIcons(context).refresh,size: 20,),
+                  icon: Icon(PlatformIcons(context).refresh, size: 20),
                   onPressed: () {
                     webViewController?.reload();
                   },
                 ),
                 PlatformIconButton(
-                  icon: Icon(PlatformIcons(context).forward,size: 20,),
+                  icon: Icon(PlatformIcons(context).forward, size: 20),
                   onPressed: () {
                     webViewController?.goForward();
                   },
@@ -154,23 +151,23 @@ class _WebViewState extends State<WebView> {
             ),
           ),
           Container(
-            decoration: BoxDecoration(
-              color:Colors.white70,
-            ),
+            decoration: BoxDecoration(color: Colors.white70),
             width: double.infinity,
             child: Center(
               child: Padding(
                 padding: EdgeInsets.all(2),
-                child: PlatformText('\u00A9 2025 Oil India Limited. All rights reserved', style: TextStyle(fontSize: 12)),
+                child: PlatformText(
+                  '\u00A9 2025 Oil India Limited. All rights reserved',
+                  style: TextStyle(fontSize: 12),
+                ),
               ),
             ),
-
-          )
+          ),
         ],
       ),
     );
 
-/*      PopScope(
+    /*      PopScope(
       canPop: false,
       onPopInvokedWithResult: (bool didPop, Object? result) async {
         print('result $result.toString()');
