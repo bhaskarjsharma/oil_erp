@@ -71,8 +71,10 @@ class _WebViewState extends State<WebView> {
                 } else if (Platform.isIOS) {
                   directory = await getApplicationDocumentsDirectory();
                 }
-
+                print('directory $directory');
+                
                 final filePath = '${directory?.path}/$filename';
+                print('filePath $filePath');
 
                 final cookies = await CookieManager.instance().getCookies(url: request.url);
                 final cookieHeader = cookies.map((e) => "${e.name}=${e.value}").join("; ");
