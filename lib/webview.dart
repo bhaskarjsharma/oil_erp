@@ -116,8 +116,17 @@ class _WebViewState extends State<WebView> {
               children: <Widget>[
                 PlatformIconButton(
                   icon: Icon(PlatformIcons(context).back,size: 20,),
-                  onPressed: () {
-                    webViewController?.goBack();
+                  onPressed: () async {
+                     if (webViewController != null) {
+                      bool canGoBack = await webViewController!.canGoBack();
+                      if (canGoBack) {
+                        webViewController!.goBack();
+                      } else {
+                        context.pop();
+                      }
+                      } else {
+                        context.pop();
+                      }
                   },
                 ),
                 PlatformIconButton(
