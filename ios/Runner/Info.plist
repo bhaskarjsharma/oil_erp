@@ -50,6 +50,8 @@
           <dict>
             <key>NSAllowsArbitraryLoads</key> <true/>
           </dict>
+	<key>io.flutter.embedded_views_preview</key>
+        <string>YES</string>
 		<key>CADisableMinimumFrameDurationOnPhone</key>
 		<true/>
 		<key>UIApplicationSupportsIndirectInputEvents</key>
