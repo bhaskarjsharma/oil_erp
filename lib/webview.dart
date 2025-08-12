@@ -46,7 +46,7 @@ class _WebViewState extends State<WebView> {
       body: SafeArea(child: Column(
         children: [
           progress < 1.0
-              ? LinearProgressIndicator(value: progress)
+              ? LinearProgressIndicator(value: progress,color: Color.fromRGBO(227, 30, 36, 1),backgroundColor: Colors.black,)
               : Container(),
           Expanded(
             child: WebViewWidget(context),
@@ -184,7 +184,7 @@ class _WebViewState extends State<WebView> {
           },
           child: InAppWebView(
             initialUrlRequest: URLRequest(url: WebUri(widget.url)),
-            initialSettings: InAppWebViewSettings(useOnDownloadStart: true),
+            initialSettings: InAppWebViewSettings(useOnDownloadStart: true,),
             onProgressChanged: (controller, int progress) {
               setState(() {
                 this.progress = progress / 100;
