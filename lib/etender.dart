@@ -48,7 +48,7 @@ class _ETenderState extends State<ETender> {
         automaticallyImplyLeading: true,
         scrolledUnderElevation: 0,
       ),
-      body: Column(
+      body: SafeArea(child: Column(
         children: [
           Container(
             decoration: BoxDecoration(
@@ -134,6 +134,7 @@ class _ETenderState extends State<ETender> {
 
           )
         ],
+      ),
       ),
     );
 

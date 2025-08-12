@@ -19,7 +19,7 @@ class Home extends StatelessWidget {
         automaticallyImplyLeading: false,
         scrolledUnderElevation: 0,
       ),
-      body: Container(
+      body: SafeArea(child: Container(
         decoration: BoxDecoration(
           color:Color(0xFFE5E5E5),
         ),
@@ -195,6 +195,7 @@ class Home extends StatelessWidget {
             )
           ],
         ),
+      ),
       ),
     );
   }

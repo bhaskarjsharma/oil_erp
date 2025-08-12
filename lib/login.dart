@@ -20,7 +20,7 @@ class Login extends StatelessWidget {
     automaticallyImplyLeading: true,
     scrolledUnderElevation: 0,
     ),
-      body: Container(
+      body: SafeArea(child: Container(
         decoration: BoxDecoration(
           color:Color(0xFFE5E5E5),
         ),
@@ -111,7 +111,7 @@ class Login extends StatelessWidget {
             )
           ],
         ),
-      ),
+      ),),
     );
   }
 }

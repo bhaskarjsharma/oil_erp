@@ -16,7 +16,7 @@ class CompanyProfilePage extends StatelessWidget {
         automaticallyImplyLeading: true,
         scrolledUnderElevation: 0,
       ),
-      body: Stack(
+      body: SafeArea(child: Stack(
         children: [
           const Positioned(
             top: 0,
@@ -53,7 +53,7 @@ class CompanyProfilePage extends StatelessWidget {
             ),
           ),
         ],
-      ),
+      ),)
     );
   }
 }

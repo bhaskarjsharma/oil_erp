@@ -28,7 +28,7 @@ class _VendorState extends State<Vendor> {
         automaticallyImplyLeading: true,
         scrolledUnderElevation: 0,
       ),
-      body: Column(
+      body: SafeArea(child: Column(
         children: [
           Container(
             decoration: BoxDecoration(
@@ -145,7 +145,7 @@ class _VendorState extends State<Vendor> {
 
           )
         ],
-      ),
+      ),)
     );
   }
 }

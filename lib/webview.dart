@@ -43,7 +43,7 @@ class _WebViewState extends State<WebView> {
         centerTitle: true,
         scrolledUnderElevation: 0,
       ),
-      body: Column(
+      body: SafeArea(child: Column(
         children: [
           progress < 1.0
               ? LinearProgressIndicator(value: progress)
@@ -102,7 +102,7 @@ class _WebViewState extends State<WebView> {
             ),
           ),
         ],
-      ),
+      ),)
     );
 
     /*      PopScope(

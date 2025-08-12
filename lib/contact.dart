@@ -34,12 +34,13 @@ class ContactUs extends StatelessWidget {
         centerTitle: true,
         backgroundColor: Color(0xFF004080),
       ),
-      body: ListView(
+      body: SafeArea(child: ListView(
         padding: const EdgeInsets.all(16),
         children: [
           ...offices.map((office) => ContactOfficeCard(office)).toList(),
           FeedbackSection(),
         ],
+      ),
       ),
     );
   }

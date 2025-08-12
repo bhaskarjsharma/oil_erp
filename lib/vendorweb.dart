@@ -61,7 +61,7 @@ class _VendorWebViewState extends State<VendorWebView> {
         centerTitle: true,
         scrolledUnderElevation: 0,
       ),
-      body: Column(
+      body: SafeArea(child: Column(
         children: [
           Expanded(child: isLoading == true ?  Container(
             child: Center(
@@ -95,7 +95,7 @@ class _VendorWebViewState extends State<VendorWebView> {
 
           )
         ],
-      ),
+      ),)
     );
   }
 }

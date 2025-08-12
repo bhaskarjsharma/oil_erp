@@ -157,7 +157,7 @@ class _OurLeadershipPageState extends State<Leadership> {
         title: Center(child:Image.asset('images/oil_logo_with_background.png',height:55),),
         automaticallyImplyLeading: true,
       ),*/
-      body: Column(
+      body: SafeArea(child: Column(
         children: [
           Container(
             decoration: BoxDecoration(
@@ -279,7 +279,7 @@ class _OurLeadershipPageState extends State<Leadership> {
 
           )
         ],
-      ),
+      ),)
     );
   }
 }

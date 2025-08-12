@@ -53,7 +53,7 @@ class _WebViewStaticState extends State<WebViewStatic> {
         automaticallyImplyLeading: true,
         scrolledUnderElevation: 0,
       ),
-      body: Column(
+      body: SafeArea(child: Column(
         children: [
           Expanded(
             child: WebViewWidget(
@@ -74,7 +74,7 @@ class _WebViewStaticState extends State<WebViewStatic> {
 
           )
         ],
-      ),
+      ),)
     );
 
 
