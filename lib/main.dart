@@ -1,6 +1,11 @@
+import 'dart:async';
+
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart' hide NotificationDetails;
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:go_router/go_router.dart';
 import 'package:oil_erp/vendorweb.dart';
 import 'package:oil_erp/webviewstatic.dart';
@@ -10,12 +15,25 @@ import 'etender.dart';
 import 'home.dart';
 import 'leadership.dart';
 import 'login.dart';
+import 'notification.dart';
+import 'notifications.dart';
+import 'sos.dart';
 import 'test.dart';
 import 'vendor.dart';
 import 'webview.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
 var loginType = "";
 var backendURL = "";
+FirebaseMessaging  messaging = FirebaseMessaging.instance;
+FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+final storage = FlutterSecureStorage();
+late String salaryCode;
+late String fcmToken;
+late bool isRegisteredForSOS;
+
+int id = 0;
 
 final GoRouter router = GoRouter(
   routes: <RouteBase>[
@@ -88,9 +106,24 @@ final GoRouter router = GoRouter(
           },
         ),
         GoRoute(
+          path: 'sos',
+          builder: (BuildContext context, GoRouterState state) => SOS(),
+        ),
+        GoRoute(
+          path: 'sosregister',
+          builder: (BuildContext context, GoRouterState state) => SosRegistration(),
+        ),
+        GoRoute(
+          path: '/notification',
+          builder: (context, state) {
+            final data = state.extra as Map<String, dynamic>;
+            return NotificationDetails(data: data);
+          },
+        ),
+        /*GoRoute(
           path: 'test',
           builder: (BuildContext context, GoRouterState state) => Test(),
-        ),
+        ),*/
       ],
     ),
 
@@ -100,9 +133,15 @@ final GoRouter router = GoRouter(
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized(); // handle exceptions caused by making main async.
+  await Firebase.initializeApp();
+  await NotificationService();
+
+  salaryCode = await storage.read(key: "salaryCode") ?? "";
+  fcmToken = await storage.read(key: "fcmToken") ?? "";
+  isRegisteredForSOS = (await storage.read(key: "SOSRegistration"))?.toLowerCase() == "true";
+
   runApp(const MainApp());
 }
-
 
 class MainApp extends StatefulWidget {
   const MainApp({super.key});

@@ -1,11 +1,16 @@
+/*
 import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:timezone/data/latest_all.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
+import 'main.dart';
 
 
 class Test extends StatefulWidget {
@@ -20,11 +25,118 @@ class _TestState extends State<Test> {
   String url = "";
   double progress = 0;
   bool isLoading = false;
+  bool _notificationsEnabled = false;
 
   @override
   void initState() {
     super.initState();
+    tz.initializeTimeZones();
+    _isAndroidPermissionGranted();
+    _requestPermissions();
   }
+
+  Future<void> _isAndroidPermissionGranted() async {
+    if (Platform.isAndroid) {
+      final bool granted = await flutterLocalNotificationsPlugin
+          .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin>()
+          ?.areNotificationsEnabled() ??
+          false;
+
+      setState(() {
+        _notificationsEnabled = granted;
+      });
+    }
+  }
+  Future<void> _requestPermissions() async {
+    if (Platform.isIOS || Platform.isMacOS) {
+      await flutterLocalNotificationsPlugin
+          .resolvePlatformSpecificImplementation<
+          IOSFlutterLocalNotificationsPlugin>()
+          ?.requestPermissions(
+        alert: true,
+        badge: true,
+        sound: true,
+      );
+      await flutterLocalNotificationsPlugin
+          .resolvePlatformSpecificImplementation<
+          MacOSFlutterLocalNotificationsPlugin>()
+          ?.requestPermissions(
+        alert: true,
+        badge: true,
+        sound: true,
+      );
+    } else if (Platform.isAndroid) {
+      final AndroidFlutterLocalNotificationsPlugin? androidImplementation =
+      flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin>();
+
+      final bool? grantedNotificationPermission =
+      await androidImplementation?.requestNotificationsPermission();
+      setState(() {
+        _notificationsEnabled = grantedNotificationPermission ?? false;
+      });
+    }
+  }
+
+  Future<void> _requestPermissionsWithCriticalAlert() async {
+    if (Platform.isIOS || Platform.isMacOS) {
+      await flutterLocalNotificationsPlugin
+          .resolvePlatformSpecificImplementation<
+          IOSFlutterLocalNotificationsPlugin>()
+          ?.requestPermissions(
+        alert: true,
+        badge: true,
+        sound: true,
+        critical: true,
+      );
+      await flutterLocalNotificationsPlugin
+          .resolvePlatformSpecificImplementation<
+          MacOSFlutterLocalNotificationsPlugin>()
+          ?.requestPermissions(
+        alert: true,
+        badge: true,
+        sound: true,
+        critical: true,
+      );
+    }
+  }
+
+  Future<void> _requestNotificationPolicyAccess() async {
+    final AndroidFlutterLocalNotificationsPlugin? androidImplementation =
+    flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<
+        AndroidFlutterLocalNotificationsPlugin>();
+    await androidImplementation?.requestNotificationPolicyAccess();
+  }
+  Future<void> _requestFullScreenIntentPermission() async {
+    final bool permissionGranted = await flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<
+        AndroidFlutterLocalNotificationsPlugin>()
+        ?.requestFullScreenIntentPermission() ??
+        false;
+    await showDialog<void>(
+        context: context,
+        builder: (BuildContext context) => AlertDialog(
+          content: Text(
+              'Full screen intent permission granted: $permissionGranted'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        ));
+  }
+
+
+  @override
+  void dispose() {
+    selectNotificationStream.close();
+    super.dispose();
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -46,152 +158,235 @@ class _TestState extends State<Test> {
       ),
       body: Column(
         children: [
-          progress < 1.0
-              ? LinearProgressIndicator(value: progress)
-              : Container(),
-          Expanded(
-              child: InAppWebView(
-                initialUrlRequest: URLRequest(url: WebUri("https://ess.oilindia.in")),
-                initialSettings: InAppWebViewSettings(
-                  useOnDownloadStart: true,
-                ),
-                onProgressChanged: (controller,int progress) {
-                  setState(() {
-                    this.progress = progress / 100;
-                  });
-                },
-                onPermissionRequest: (controller, request) async {
-                  return PermissionResponse(
-                      resources: request.resources,
-                      action: PermissionResponseAction.GRANT);
-                },
-                onWebViewCreated: (controller) {
-                  webViewController = controller;
-                },
-                onDownloadStartRequest: (controller, request) async {
-                  print("onDownloadStartRequest $url");
-                  final downloadUrl = request.url.toString();
-                  final filename = request.suggestedFilename ?? "file.pdf";
-                  print("filename $filename");
-                  final directory = await getDownloadsDirectory();
-                  print("directory $directory");
-                  final filePath = '${directory?.path}/$filename';
-                  print("filePath $filePath");
-
-                  final cookies = await CookieManager.instance().getCookies(url: request.url);
-                  print("cookies $cookies");
-                  final cookieHeader = cookies.map((e) => "${e.name}=${e.value}").join("; ");
-                  print("cookieHeader $cookieHeader");
-
-                  try {
-                    final response = await Dio().download(
-                      downloadUrl,
-                      filePath,
-                      options: Options(
-                        headers: {
-                          'Cookie': cookieHeader,
-                        },
-                      ),
-                    );
-                    OpenFile.open(filePath);
-                    //final file = File(filePath);
-                    //await file.writeAsBytes(response.data);
-
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                      content: Text("File downloaded"),
-                    ));
-                  } catch (e) {
-                    debugPrint('Download failed: $e');
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                      content: Text("Failed to download file."),
-                    ));
-                  }
-                },
-/*                shouldOverrideUrlLoading:
-                    (controller, navigationAction) async {
-                  var uri = navigationAction.request.url!;
-                  print('url: $uri');
-                  return NavigationActionPolicy.ALLOW;
-                },*/
-              )
+          ElevatedButton(
+            onPressed: () async {
+              await _requestPermissions();
+            },
+            child: Text('Request permission (API 33+)'),
           ),
-          OverflowBar(
-            alignment: MainAxisAlignment.center,
-            children: <Widget>[
-              ElevatedButton(
-                child: const Icon(Icons.arrow_back),
-                onPressed: () {
-                  webViewController?.goBack();
-                },
-              ),
-              ElevatedButton(
-                child: const Icon(Icons.arrow_forward),
-                onPressed: () {
-                  webViewController?.goForward();
-                },
-              ),
-              ElevatedButton(
-                child: const Icon(Icons.refresh),
-                onPressed: () {
-                  webViewController?.reload();
-                },
-              ),
-            ],
+          ElevatedButton(
+            onPressed: () async {
+              await _requestNotificationPolicyAccess();
+            },
+            child: Text('Request notification policy access'),
           ),
-          Container(
-            decoration: BoxDecoration(
-              color:Colors.white70,
-            ),
-            width: double.infinity,
-            child: Center(
-              child: Padding(
-                padding: EdgeInsets.all(2),
-                child: Text('\u00A9 2025 Oil India Limited. All rights reserved', style: TextStyle(fontSize: 12)),
-              ),
-            ),
+          ElevatedButton(
+            onPressed: () async {
+              await _requestFullScreenIntentPermission();
+            },
+            child: Text('Request full-screen intent permission (API 34+)'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              await _showNotification();
+            },
+            child: Text('Show plain notification with payload'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              await _showNotificationCustomSound();
+            },
+            child: Text('Show notification with custom sound'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              await _showFullScreenNotification();
+            },
+            child: Text('Show full-screen notification'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              await _showNotificationWithAudioAttributeAlarm();
+            },
+            child: Text('Show notification with sound controlled by '
+                'alarm volume'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              await _showNotificationWithDndBypass();
+            },
+            child: Text('Show notification that ignores dnd'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              await _showNotificationWithCriticalSound();
+            },
+            child: Text('Show notification with critical sound'),
+          ),
+        ],
+      ),
+    );
+  }
 
+  Future<void> _showNotification() async {
+    const AndroidNotificationDetails androidNotificationDetails =
+    AndroidNotificationDetails('your channel id', 'your channel name',
+        channelDescription: 'your channel description',
+        importance: Importance.max,
+        priority: Priority.high,
+        ticker: 'ticker');
+    const NotificationDetails notificationDetails =
+    NotificationDetails(android: androidNotificationDetails);
+    await flutterLocalNotificationsPlugin.show(
+        id++, 'plain title', 'plain body', notificationDetails,
+        payload: 'item x');
+  }
+
+  Future<void> _showFullScreenNotification() async {
+    await showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Turn off your screen'),
+        content: const Text(
+            'to see the full-screen intent in 5 seconds, press OK and TURN '
+                'OFF your screen. Note that the full-screen intent permission must '
+                'be granted for this to work too'),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              await flutterLocalNotificationsPlugin.zonedSchedule(
+                  0,
+                  'scheduled title',
+                  'scheduled body',
+                  tz.TZDateTime.now(tz.local).add(const Duration(seconds: 5)),
+                  const NotificationDetails(
+                      android: AndroidNotificationDetails(
+                          'full screen channel id', 'full screen channel name',
+                          channelDescription: 'full screen channel description',
+                          priority: Priority.high,
+                          importance: Importance.high,
+                          fullScreenIntent: true)),
+                  androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle);
+
+              Navigator.pop(context);
+            },
+            child: const Text('OK'),
           )
         ],
       ),
     );
-
-/*      PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (bool didPop, Object? result) async {
-        print('result $result.toString()');
-        print('didPop $didPop');
-        if (didPop) {
-          return;
-        }
-        final currentUrl = await controller.currentUrl();
-        print('currentUrl: $currentUrl');
-        if (currentUrl != null && currentUrl.contains('microsoft')) {
-          // Disable WebView back if it's on "home"
-          print('At home page. Popping Flutter route.');
-          context.go('/login');
-          return;
-        }
-        else if (currentUrl != null && currentUrl.contains('#Shell-home')) {
-          // Disable WebView back if it's on "home"
-          print('At home page. Popping Flutter route.');
-          context.go('/login');
-          return;
-        }
-
-
-        final bool shouldPop = await controller.canGoBack() ?? false;
-        print('shouldPop $shouldPop');
-        if (context.mounted && shouldPop) {
-          print('controller.goBack()');
-          controller.goBack();
-        }
-        else{
-          print('go()');
-          context.go('/');
-         // Navigator.pop(context);
-        }
-      },
-      child:
-    );*/
   }
+
+  Future<void> _showNotificationCustomSound() async {
+    const AndroidNotificationDetails androidNotificationDetails =
+    AndroidNotificationDetails(
+      'your other channel id',
+      'your other channel name',
+      channelDescription: 'your other channel description',
+      sound: RawResourceAndroidNotificationSound('sos'),
+    );
+    const DarwinNotificationDetails darwinNotificationDetails =
+    DarwinNotificationDetails(
+      sound: 'sos.mp3',
+    );
+    final NotificationDetails notificationDetails = NotificationDetails(
+      android: androidNotificationDetails,
+      iOS: darwinNotificationDetails,
+    );
+    await flutterLocalNotificationsPlugin.show(
+      id++,
+      'custom sound notification title',
+      'custom sound notification body',
+      notificationDetails,
+    );
+  }
+
+  Future<void> _showNotificationWithDndBypass() async {
+    const AndroidNotificationDetails androidNotificationDetails =
+    AndroidNotificationDetails('your channel id 3', 'your channel name 3',
+        channelDescription: 'your channel description 3',
+        channelBypassDnd: true,
+        importance: Importance.max);
+    const NotificationDetails notificationDetails =
+    NotificationDetails(android: androidNotificationDetails);
+
+    await flutterLocalNotificationsPlugin.show(
+      id++,
+      'I ignored dnd',
+      'I completely ignored dnd',
+      notificationDetails,
+    );
+  }
+
+  Future<void> _createNotificationChannelWithDndBypass() async {
+    const AndroidNotificationChannel androidNotificationChannel =
+    AndroidNotificationChannel('your channel id 3', 'your channel name 3',
+        description: 'your channel description 3',
+        bypassDnd: true,
+        importance: Importance.max);
+
+    final AndroidFlutterLocalNotificationsPlugin? androidPlugin =
+    flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<
+        AndroidFlutterLocalNotificationsPlugin>();
+
+    final bool? hasPolicyAccess =
+    await androidPlugin?.hasNotificationPolicyAccess();
+    if (hasPolicyAccess ?? false) {
+      await androidPlugin?.requestNotificationPolicyAccess();
+    }
+
+    await androidPlugin?.createNotificationChannel(androidNotificationChannel);
+
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) => AlertDialog(
+        content: Text(
+            'Channel with name ${androidNotificationChannel.name} created'),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('OK'),
+          )
+        ],
+      ),
+    );
+  }
+
+  Future<void> _showNotificationWithCriticalSound() async {
+    const DarwinNotificationDetails darwinNotificationDetails =
+    DarwinNotificationDetails(
+      // Between 0.0 and 1.0
+      criticalSoundVolume: 1.0,
+      // If sound is not specified, the default sound will be used
+      sound: 'slow_spring_board.aiff',
+    );
+    const NotificationDetails notificationDetails = NotificationDetails(
+      iOS: darwinNotificationDetails,
+      macOS: darwinNotificationDetails,
+    );
+    await flutterLocalNotificationsPlugin.show(
+      id++,
+      'Critical sound notification title',
+      'Critical sound notification body',
+      notificationDetails,
+    );
+  }
+
+  Future<void> _showNotificationWithAudioAttributeAlarm() async {
+    const AndroidNotificationDetails androidPlatformChannelSpecifics =
+    AndroidNotificationDetails(
+      'your alarm channel id',
+      'your alarm channel name',
+      channelDescription: 'your alarm channel description',
+      importance: Importance.max,
+      priority: Priority.high,
+      audioAttributesUsage: AudioAttributesUsage.alarm,
+    );
+    const NotificationDetails platformChannelSpecifics =
+    NotificationDetails(android: androidPlatformChannelSpecifics);
+    await flutterLocalNotificationsPlugin.show(
+      0,
+      'notification sound controlled by alarm volume',
+      'alarm notification sound body',
+      platformChannelSpecifics,
+    );
+  }
+
 }
+*/

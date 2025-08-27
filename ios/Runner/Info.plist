@@ -63,5 +63,11 @@
 	<false/>
 	<key>io.flutter.embedded_views_preview</key>
 	<string>YES</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+    <string>Your location is used to provide relevant information and services while you are using the app.</string>
+    <key>PermissionGroupNotification</key>
+    <string>Notification permission is required to send/receive push notification</string>
+    <key>UNAuthorizationOptionCriticalAlert</key>
+    <string>Critical Alert permission required to send/receive SOS alarm signal</string>
 </dict>
 </plist>
