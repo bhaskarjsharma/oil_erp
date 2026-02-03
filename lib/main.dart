@@ -3,10 +3,13 @@ import 'dart:async';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart' hide NotificationDetails;
+import 'package:flutter_local_notifications/flutter_local_notifications.dart'
+    hide NotificationDetails;
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:go_router/go_router.dart';
+import 'package:oil_erp/authentication.dart';
+import 'package:oil_erp/offlineservices.dart';
 import 'package:oil_erp/vendorweb.dart';
 import 'package:oil_erp/webviewstatic.dart';
 import 'company.dart';
@@ -22,16 +25,19 @@ import 'test.dart';
 import 'vendor.dart';
 import 'webview.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'firebase_options.dart';
+//import 'firebase_options.dart';
 
 var loginType = "";
 var backendURL = "";
-FirebaseMessaging  messaging = FirebaseMessaging.instance;
-FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+FirebaseMessaging messaging = FirebaseMessaging.instance;
+FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+    FlutterLocalNotificationsPlugin();
 final storage = FlutterSecureStorage();
 late String salaryCode;
 late String fcmToken;
 late bool isRegisteredForSOS;
+late bool offlineRegistered;
+late String JWT;
 
 int id = 0;
 
@@ -48,16 +54,18 @@ final GoRouter router = GoRouter(
           builder: (BuildContext context, GoRouterState state) => Vendor(),
           routes: <RouteBase>[
             GoRoute(
-              path: 'vendorwebview',  // ✅ no path parameter here
+              path: 'vendorwebview', // ✅ no path parameter here
               builder: (context, state) {
                 final url = state.uri.queryParameters['url'];
                 if (url == null || url.isEmpty) {
-                  return const Scaffold(body: Center(child: Text("Missing URL")));
+                  return const Scaffold(
+                    body: Center(child: Text("Missing URL")),
+                  );
                 }
                 return VendorWebView(url: url);
               },
             ),
-          ]
+          ],
         ),
         GoRoute(
           path: 'login',
@@ -65,7 +73,8 @@ final GoRouter router = GoRouter(
         ),
         GoRoute(
           path: 'company',
-          builder: (BuildContext context, GoRouterState state) => CompanyProfilePage(),
+          builder: (BuildContext context, GoRouterState state) =>
+              CompanyProfilePage(),
         ),
         GoRoute(
           path: 'leadership',
@@ -76,7 +85,7 @@ final GoRouter router = GoRouter(
           builder: (BuildContext context, GoRouterState state) => ContactUs(),
         ),
         GoRoute(
-          path: 'etender',  // ✅ no path parameter here
+          path: 'etender', // ✅ no path parameter here
           builder: (context, state) {
             final url = state.uri.queryParameters['url'];
             if (url == null || url.isEmpty) {
@@ -86,7 +95,7 @@ final GoRouter router = GoRouter(
           },
         ),
         GoRoute(
-          path: 'webview',  // ✅ no path parameter here
+          path: 'webview', // ✅ no path parameter here
           builder: (context, state) {
             final url = state.uri.queryParameters['url'];
             if (url == null || url.isEmpty) {
@@ -96,7 +105,7 @@ final GoRouter router = GoRouter(
           },
         ),
         GoRoute(
-          path: 'webviewstatic',  // ✅ no path parameter here
+          path: 'webviewstatic', // ✅ no path parameter here
           builder: (context, state) {
             final content = state.uri.queryParameters['htmlSource'];
             if (content == null || content.isEmpty) {
@@ -106,12 +115,22 @@ final GoRouter router = GoRouter(
           },
         ),
         GoRoute(
+          path: 'offline',
+          builder: (BuildContext context, GoRouterState state) =>
+              OfflineServices(),
+        ),
+        GoRoute(
+          path: 'otplogin',
+          builder: (BuildContext context, GoRouterState state) => OTPLogin(),
+        ),
+        GoRoute(
           path: 'sos',
           builder: (BuildContext context, GoRouterState state) => SOS(),
         ),
         GoRoute(
           path: 'sosregister',
-          builder: (BuildContext context, GoRouterState state) => SosRegistration(),
+          builder: (BuildContext context, GoRouterState state) =>
+              SosRegistration(),
         ),
         GoRoute(
           path: '/notification',
@@ -126,20 +145,21 @@ final GoRouter router = GoRouter(
         ),*/
       ],
     ),
-
-
   ],
 );
 
-void main() async{
+void main() async {
   WidgetsFlutterBinding.ensureInitialized(); // handle exceptions caused by making main async.
   await Firebase.initializeApp();
   await NotificationService();
 
   salaryCode = await storage.read(key: "salaryCode") ?? "";
   fcmToken = await storage.read(key: "fcmToken") ?? "";
-  isRegisteredForSOS = (await storage.read(key: "SOSRegistration"))?.toLowerCase() == "true";
-
+  JWT = await storage.read(key: "JWT") ?? "";
+  isRegisteredForSOS =
+      (await storage.read(key: "SOSRegistration"))?.toLowerCase() == "true";
+  offlineRegistered =
+      (await storage.read(key: "OfflineRegistration"))?.toLowerCase() == "true";
   runApp(const MainApp());
 }
 
@@ -148,9 +168,9 @@ class MainApp extends StatefulWidget {
 
   @override
   State<MainApp> createState() => _MainAppState();
-
 }
-class _MainAppState extends State<MainApp>{
+
+class _MainAppState extends State<MainApp> {
   ThemeMode? themeMode = ThemeMode.light;
 
   @override
@@ -158,8 +178,9 @@ class _MainAppState extends State<MainApp>{
     final materialLightTheme = ThemeData.light();
     final materialDarkTheme = ThemeData.dark();
 
-    const darkDefaultCupertinoTheme =
-    CupertinoThemeData(brightness: Brightness.dark);
+    const darkDefaultCupertinoTheme = CupertinoThemeData(
+      brightness: Brightness.dark,
+    );
     final cupertinoDarkTheme = MaterialBasedCupertinoThemeData(
       materialTheme: materialDarkTheme.copyWith(
         cupertinoOverrideTheme: CupertinoThemeData(
@@ -167,44 +188,45 @@ class _MainAppState extends State<MainApp>{
           barBackgroundColor: darkDefaultCupertinoTheme.barBackgroundColor,
           textTheme: CupertinoTextThemeData(
             primaryColor: Colors.white,
-            navActionTextStyle:
-            darkDefaultCupertinoTheme.textTheme.navActionTextStyle.copyWith(
-              color: const Color(0xF0F9F9F9),
-            ),
+            navActionTextStyle: darkDefaultCupertinoTheme
+                .textTheme
+                .navActionTextStyle
+                .copyWith(color: const Color(0xF0F9F9F9)),
             navLargeTitleTextStyle: darkDefaultCupertinoTheme
-                .textTheme.navLargeTitleTextStyle
+                .textTheme
+                .navLargeTitleTextStyle
                 .copyWith(color: const Color(0xF0F9F9F9)),
           ),
         ),
       ),
     );
-    final cupertinoLightTheme =
-    MaterialBasedCupertinoThemeData(materialTheme: materialLightTheme);
+    final cupertinoLightTheme = MaterialBasedCupertinoThemeData(
+      materialTheme: materialLightTheme,
+    );
 
     return PlatformProvider(
       settings: PlatformSettingsData(
         iosUsesMaterialWidgets: true,
         iosUseZeroPaddingForAppbarPlatformIcon: true,
       ),
-      builder: (context) =>
-          PlatformTheme(
-            themeMode: themeMode,
-            materialLightTheme: materialLightTheme,
-            materialDarkTheme: materialDarkTheme,
-            cupertinoLightTheme: cupertinoLightTheme,
-            cupertinoDarkTheme: cupertinoDarkTheme,
-            matchCupertinoSystemChromeBrightness: true,
-            onThemeModeChanged: (themeMode) {
-              this.themeMode = themeMode; /* you can save to storage */
-            },
-            builder: (context) => PlatformApp.router(
-              localizationsDelegates: <LocalizationsDelegate<dynamic>>[
-                DefaultMaterialLocalizations.delegate,
-                DefaultWidgetsLocalizations.delegate,
-                DefaultCupertinoLocalizations.delegate,
-              ],
-              routerConfig: router,
-/*              builder: (context, child) => ResponsiveBreakpoints.builder(
+      builder: (context) => PlatformTheme(
+        themeMode: themeMode,
+        materialLightTheme: materialLightTheme,
+        materialDarkTheme: materialDarkTheme,
+        cupertinoLightTheme: cupertinoLightTheme,
+        cupertinoDarkTheme: cupertinoDarkTheme,
+        matchCupertinoSystemChromeBrightness: true,
+        onThemeModeChanged: (themeMode) {
+          this.themeMode = themeMode; /* you can save to storage */
+        },
+        builder: (context) => PlatformApp.router(
+          localizationsDelegates: <LocalizationsDelegate<dynamic>>[
+            DefaultMaterialLocalizations.delegate,
+            DefaultWidgetsLocalizations.delegate,
+            DefaultCupertinoLocalizations.delegate,
+          ],
+          routerConfig: router,
+          /*              builder: (context, child) => ResponsiveBreakpoints.builder(
                 breakpoints: [
                   const Breakpoint(start: 0, end: 450, name: MOBILE),
                   const Breakpoint(start: 451, end: 800, name: TABLET),
@@ -213,8 +235,8 @@ class _MainAppState extends State<MainApp>{
                 ],
                 child: child!,
               ),*/
-            ),
-          ),
+        ),
+      ),
     );
     //return MaterialApp.router(routerConfig: router);
   }

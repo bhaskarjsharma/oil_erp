@@ -145,6 +145,12 @@ class Home extends StatelessWidget {
                         Colors.blue,"static_html","about.html", context
                     ),
                     launchScreenCard(
+                        "Offline Services",
+                        const Icon(Icons.offline_pin_outlined,
+                            size: 30, color: Color.fromRGBO(227, 30, 36, 1)),
+                        Colors.blue,"page","/otplogin", context
+                    ),
+                    launchScreenCard(
                         "SOS Alarm",
                         const Icon(Icons.emergency_outlined,
                             size: 30, color: Color.fromRGBO(227, 30, 36, 1)),
