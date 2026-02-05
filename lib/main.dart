@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:io';
 
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -8,10 +10,15 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart'
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hive_ce/hive.dart';
+import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:oil_erp/authentication.dart';
+import 'package:oil_erp/hive/hive_registrar.g.dart';
+import 'package:oil_erp/hive/models.dart';
 import 'package:oil_erp/offlineservices.dart';
 import 'package:oil_erp/vendorweb.dart';
 import 'package:oil_erp/webviewstatic.dart';
+import 'package:path_provider/path_provider.dart';
 import 'company.dart';
 import 'contact.dart';
 import 'etender.dart';
@@ -27,17 +34,23 @@ import 'webview.dart';
 import 'package:firebase_core/firebase_core.dart';
 //import 'firebase_options.dart';
 
+bool isInternetAvailable = false;
+late List<ConnectivityResult> connectionStatus;
 var loginType = "";
 var backendURL = "";
 FirebaseMessaging messaging = FirebaseMessaging.instance;
 FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
 final storage = FlutterSecureStorage();
-late String salaryCode;
+bool EmpRegistered = false;
+late String OILId;
+late String JWT;
 late String fcmToken;
 late bool isRegisteredForSOS;
-late bool offlineRegistered;
-late String JWT;
+String serverBaseUrl = "https://oil-erpapp-server-timely-raven-vv.cfapps.in30.hana.ondemand.com/api/";
+
+String apiUrl = '';
+Directory? hiveDirectory;
 
 int id = 0;
 
@@ -46,7 +59,7 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: '/',
       builder: (BuildContext context, GoRouterState state) {
-        return const Home();
+        return Home();
       },
       routes: <RouteBase>[
         GoRoute(
@@ -150,16 +163,30 @@ final GoRouter router = GoRouter(
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized(); // handle exceptions caused by making main async.
+
+  connectionStatus = await (Connectivity().checkConnectivity());
+
+  //----------------------- Hive ------------------------------
+  hiveDirectory = await getApplicationDocumentsDirectory();
+  
+  final path = hiveDirectory?.path;
+  debugPrint(path);
+  Hive.init(path);
+  Hive.registerAdapters();
+  
+  await Hive.openBox<EmpTraining>('emptraining');
+  //--------------******** Firebase *****************************
   await Firebase.initializeApp();
   await NotificationService();
 
-  salaryCode = await storage.read(key: "salaryCode") ?? "";
-  fcmToken = await storage.read(key: "fcmToken") ?? "";
+  EmpRegistered = (await storage.read(key: "EmpReg"))?.toLowerCase() == "true";
+  OILId = await storage.read(key: "OILId") ?? "";
   JWT = await storage.read(key: "JWT") ?? "";
+  fcmToken = await storage.read(key: "fcmToken") ?? "";
+  
   isRegisteredForSOS =
       (await storage.read(key: "SOSRegistration"))?.toLowerCase() == "true";
-  offlineRegistered =
-      (await storage.read(key: "OfflineRegistration"))?.toLowerCase() == "true";
+  
   runApp(const MainApp());
 }
 

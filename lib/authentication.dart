@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
+import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:oil_erp/main.dart';
 import 'package:pinput/pinput.dart';
 
@@ -20,9 +21,8 @@ class _OTPLoginState extends State<OTPLogin> {
   bool _otpSent = false;
   String _smsId = '';
   String _pernr = '';
-  String serverBaseUrl =
-      "https://oil-erpapp-server-timely-raven-vv.cfapps.in30.hana.ondemand.com/api/";
-  String apiUrl = '';
+  String _mobile = '';
+  
   //late final SmsRetriever smsRetriever;
   late final TextEditingController pinController;
   late final FocusNode focusNode;
@@ -48,7 +48,6 @@ class _OTPLoginState extends State<OTPLogin> {
     final apiUrl = '${serverBaseUrl}auth/initotp';
     setState(() {
       _loading = true;
-      _pernr = _oilIdCtrl.text.trim(); // save for verify step
     });
     try {
       final res = await http
@@ -68,11 +67,13 @@ class _OTPLoginState extends State<OTPLogin> {
         setState(() {
           _otpSent = true;
           _smsId = data['smsid']; // save for verify step
+          _pernr = data['pernr']; // set pernr received from backend
+          _mobile = data['mobile'];
         });
       } else {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text("Invalid Salary Code")));
+        ).showSnackBar(SnackBar(content: Text("Invalid OIL Id")));
       }
     } catch (e) {
       //_showError(e.toString());
@@ -102,13 +103,18 @@ class _OTPLoginState extends State<OTPLogin> {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text("OTP verified successfully")));
+
+        String jwtToken = data['access_token'];
+        //Map<String, dynamic> decodedToken = JwtDecoder.decode(jwtToken);
+        //String pernr = decodedToken["sub"];
         setState(() {
-          JWT = data['access_token']; // save for verify step
-          offlineRegistered = true;
-          
+          JWT = jwtToken; // save for verify step
+          EmpRegistered = true;
+          OILId = _pernr;
         });
         await storage.write(key: "JWT", value: data['access_token']);
-        await storage.write(key: "OfflineRegistration", value: offlineRegistered.toString());
+        await storage.write(key: "EmpReg", value: EmpRegistered.toString());
+        await storage.write(key: "OILId", value: OILId);
         context.go('/offline');
       } else {
         ScaffoldMessenger.of(
@@ -281,7 +287,7 @@ class _OTPLoginState extends State<OTPLogin> {
             const SizedBox(height: 8),
 
             PlatformText(
-              'Enter the 4 digit code sent to your registered mobile number',
+              'Enter the 4 digit code sent to your registered mobile number $_mobile',
               textAlign: TextAlign.center,
               style: const TextStyle(fontSize: 16),
             ),

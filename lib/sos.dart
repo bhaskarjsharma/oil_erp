@@ -337,7 +337,7 @@ class _SosRegistrationState extends State<SosRegistration> {
     if (token != null) {
       setState(() {
         fcmToken = token;
-        salaryCode = _salaryCtrl.text;
+        //salaryCode = _salaryCtrl.text;
         isRegisteredForSOS = true;
         _loading = false;
       });
